@@ -1,30 +1,30 @@
 create or replace procedure JOB_LOADER_DATA
 is
-  --- для открытия файла ---
+  --- РґР»СЏ РѕС‚РєСЂС‹С‚РёСЏ С„Р°Р№Р»Р° ---
   vfile         utl_file.file_type; 
-  --- буфер ---
+  --- Р±СѓС„РµСЂ ---
   vbuffer       varchar2(4000);     
-  --- значение каждой колонки ---
+  --- Р·РЅР°С‡РµРЅРёРµ РєР°Р¶РґРѕР№ РєРѕР»РѕРЅРєРё ---
   vcolumn       varchar2(4000);      
-  --- текущая команда ---
+  --- С‚РµРєСѓС‰Р°СЏ РєРѕРјР°РЅРґР° ---
   vcmd          varchar2(32767);    
-  --- имя файла ---
+  --- РёРјСЏ С„Р°Р№Р»Р° ---
   filename      varchar2(255);      
-  --- имя таблицы ---
+  --- РёРјСЏ С‚Р°Р±Р»РёС†С‹ ---
   tablename     varchar2(120);      
-  --- первая строка с названием колонок ---
+  --- РїРµСЂРІР°СЏ СЃС‚СЂРѕРєР° СЃ РЅР°Р·РІР°РЅРёРµРј РєРѕР»РѕРЅРѕРє ---
   vfirstrow     varchar2(4000);     
-  --- признак сущ или нет таблица ---
+  --- РїСЂРёР·РЅР°Рє СЃСѓС‰ РёР»Рё РЅРµС‚ С‚Р°Р±Р»РёС†Р° ---
   istableexists number := 0;        
-  --- для формирования имени темповой таблицы ---
+  --- РґР»СЏ С„РѕСЂРјРёСЂРѕРІР°РЅРёСЏ РёРјРµРЅРё С‚РµРјРїРѕРІРѕР№ С‚Р°Р±Р»РёС†С‹ ---
   vtmpprefix    varchar2(50) := '_tmp_' || replace(to_char(trunc(sysdate), 'YYYY.MM.DD'), '.','_');
-  --- для логирования всех действий  ---
+  --- РґР»СЏ Р»РѕРіРёСЂРѕРІР°РЅРёСЏ РІСЃРµС… РґРµР№СЃС‚РІРёР№  ---
   vlog          varchar2(32767); 
-  --- максимальное кол-во колонок, которое может обработать данная процедура ---  
+  --- РјР°РєСЃРёРјР°Р»СЊРЅРѕРµ РєРѕР»-РІРѕ РєРѕР»РѕРЅРѕРє, РєРѕС‚РѕСЂРѕРµ РјРѕР¶РµС‚ РѕР±СЂР°Р±РѕС‚Р°С‚СЊ РґР°РЅРЅР°СЏ РїСЂРѕС†РµРґСѓСЂР° ---  
   max_column_count number := 50;
-  --- перечислитель строк, для подсчета кол-ва обработанных строк файла
+  --- РїРµСЂРµС‡РёСЃР»РёС‚РµР»СЊ СЃС‚СЂРѕРє, РґР»СЏ РїРѕРґСЃС‡РµС‚Р° РєРѕР»-РІР° РѕР±СЂР°Р±РѕС‚Р°РЅРЅС‹С… СЃС‚СЂРѕРє С„Р°Р№Р»Р°
   rowcounter       number := 0;
-  --- расширенный лог ---
+  --- СЂР°СЃС€РёСЂРµРЅРЅС‹Р№ Р»РѕРі ---
   v_ext_log        dbms_sql.varchar2a;
 begin
   for rec in (select * from loader_tables where priz = 1)
@@ -46,12 +46,12 @@ begin
     vlog     := vlog || to_char(sysdate, 'hh24:mi:ss dd.mm.yyyy') || chr(13) || chr(10);
     vlog     := vlog || ': get_line: '; 
     vlog     := vlog || chr(13) || chr(10);
-    -- Считываем первую строку с названием колонок
+    -- РЎС‡РёС‚С‹РІР°РµРј РїРµСЂРІСѓСЋ СЃС‚СЂРѕРєСѓ СЃ РЅР°Р·РІР°РЅРёРµРј РєРѕР»РѕРЅРѕРє
     utl_file.get_line(vfile, vbuffer);
     vfirstrow := vbuffer;
     vlog      := vlog || vbuffer;
     vlog      := vlog || chr(13) || chr(10);
-    -- Необходимо определить создана таблица или нет
+    -- РќРµРѕР±С…РѕРґРёРјРѕ РѕРїСЂРµРґРµР»РёС‚СЊ СЃРѕР·РґР°РЅР° С‚Р°Р±Р»РёС†Р° РёР»Рё РЅРµС‚
     declare
       v_rowid     rowid;
     begin
@@ -66,7 +66,7 @@ begin
     vlog := vlog || chr(13) || chr(10) ||  'tablename: ' || tablename;
     vlog := vlog || chr(13) || chr(10) ||  'istableexists: ' || istableexists;
     
-    if istableexists = 0 -- если не создана то создаем
+    if istableexists = 0 -- РµСЃР»Рё РЅРµ СЃРѕР·РґР°РЅР° С‚Рѕ СЃРѕР·РґР°РµРј
     then
       vcmd := 'create table ' || tablename || '(';
       for i in 1..max_column_count
@@ -83,10 +83,10 @@ begin
       vcmd := vcmd || ')';
       vlog := vlog || chr(13) || chr(10) || vcmd;
       execute immediate vcmd;
-    end if; -- конец проверки опр необх создания таблицы
+    end if; -- РєРѕРЅРµС† РїСЂРѕРІРµСЂРєРё РѕРїСЂ РЅРµРѕР±С… СЃРѕР·РґР°РЅРёСЏ С‚Р°Р±Р»РёС†С‹
     istableexists := 0;
     vlog := vlog || chr(13) || chr(10) || 'tablename: ' || tablename || vtmpprefix;
-   -- Необходимо определить создана темповая таблица или нет
+   -- РќРµРѕР±С…РѕРґРёРјРѕ РѕРїСЂРµРґРµР»РёС‚СЊ СЃРѕР·РґР°РЅР° С‚РµРјРїРѕРІР°СЏ С‚Р°Р±Р»РёС†Р° РёР»Рё РЅРµС‚
     declare
       v_cnt    number;
     begin
@@ -104,7 +104,7 @@ begin
    
    vlog := vlog || chr(13) || chr(10) ||  'istableexists: ' || istableexists;
       
-   if istableexists = 0 -- если не создана то создаем
+   if istableexists = 0 -- РµСЃР»Рё РЅРµ СЃРѕР·РґР°РЅР° С‚Рѕ СЃРѕР·РґР°РµРј
     then
       vcmd := 'create table ' || tablename || vtmpprefix || '(';      
       for i in 1..20
@@ -120,9 +120,9 @@ begin
       vcmd := vcmd || ')';
       vlog := vlog || chr(13) || chr(10) || vcmd;
       execute immediate vcmd;
-    end if; -- конец проверки опр необх создания таблицы
+    end if; -- РєРѕРЅРµС† РїСЂРѕРІРµСЂРєРё РѕРїСЂ РЅРµРѕР±С… СЃРѕР·РґР°РЅРёСЏ С‚Р°Р±Р»РёС†С‹
 
-   -- удаляем все из темповой таблицы
+   -- СѓРґР°Р»СЏРµРј РІСЃРµ РёР· С‚РµРјРїРѕРІРѕР№ С‚Р°Р±Р»РёС†С‹
    vcmd := 'delete from ' || tablename || vtmpprefix;
    vlog := vlog || chr(13) || chr(10) || vcmd;
    execute immediate vcmd;    
@@ -131,12 +131,12 @@ begin
     --
     LOOP
       BEGIN
-        -- чтение всех строк файла 
+        -- С‡С‚РµРЅРёРµ РІСЃРµС… СЃС‚СЂРѕРє С„Р°Р№Р»Р° 
         utl_file.get_line(vfile, vbuffer);
         IF vbuffer IS NULL THEN
           EXIT;
         END IF;
-      -- обработка тек строки файла и составление комманды на добавление записи:
+      -- РѕР±СЂР°Р±РѕС‚РєР° С‚РµРє СЃС‚СЂРѕРєРё С„Р°Р№Р»Р° Рё СЃРѕСЃС‚Р°РІР»РµРЅРёРµ РєРѕРјРјР°РЅРґС‹ РЅР° РґРѕР±Р°РІР»РµРЅРёРµ Р·Р°РїРёСЃРё:
       vcmd := 'INSERT INTO ' || tablename || vtmpprefix || ' ( ';
       for j in 1..max_column_count
       loop
@@ -172,7 +172,7 @@ begin
     vlog      := 'load_row: ' || rowcounter;
     vlog      := vlog || chr(13) || chr(10);
     vlog      := vlog || chr(13) || chr(10) || 'merge: ';
-    -- Теперь из темповой переписываем в рабочую только те записи которых там нет
+    -- РўРµРїРµСЂСЊ РёР· С‚РµРјРїРѕРІРѕР№ РїРµСЂРµРїРёСЃС‹РІР°РµРј РІ СЂР°Р±РѕС‡СѓСЋ С‚РѕР»СЊРєРѕ С‚Рµ Р·Р°РїРёСЃРё РєРѕС‚РѕСЂС‹С… С‚Р°Рј РЅРµС‚
     vcmd := 
     'insert into ' || tablename ||
     '  select * from ' || tablename || vtmpprefix || ' t' ||
@@ -193,7 +193,7 @@ begin
     execute immediate vcmd;        
     vlog := vlog || chr(13) || chr(10) || vcmd;
     vlog := vlog || chr(13) || chr(10) || 'rowcount: ' || sql%rowcount;
-    -- удаление темповой таблицы
+    -- СѓРґР°Р»РµРЅРёРµ С‚РµРјРїРѕРІРѕР№ С‚Р°Р±Р»РёС†С‹
     begin
       vcmd := 'drop table ' || tablename || vtmpprefix;
       vlog := vlog || chr(13) || chr(10) || vcmd;
@@ -202,19 +202,19 @@ begin
       when others then
         vlog := vlog || chr(13) || chr(10) || substr(sqlerrm, 1, 255);        
     end;
-    -- фиксируем транзакцию
+    -- С„РёРєСЃРёСЂСѓРµРј С‚СЂР°РЅР·Р°РєС†РёСЋ
     COMMIT;    
-    -- закрываем файл
+    -- Р·Р°РєСЂС‹РІР°РµРј С„Р°Р№Р»
     utl_file.fclose(vfile);      
     vlog := vlog || chr(13) || chr(10) || 'fileclose:' || filename;  
-    -- удаляем файл      
+    -- СѓРґР°Р»СЏРµРј С„Р°Р№Р»      
     vlog := vlog || chr(13) || chr(10) || 'removefile:' || filename;        
     utl_file.fremove('FOREX_EXPERT', filename);
     vlog := vlog || chr(13) || chr(10) || '--- **** ---'|| chr(13) || chr(10);
   END IF;
       
   if vlog is not null then
-  --- запишем лог, это важно:
+  --- Р·Р°РїРёС€РµРј Р»РѕРі, СЌС‚Рѕ РІР°Р¶РЅРѕ:
   vfile := utl_file.fopen('FOREX_EXPERT', 'log.txt', 'A');
   begin
     for i in 1..v_ext_log.count 
@@ -235,7 +235,7 @@ exception
   when others then
     ROLLBACK;    
     begin
-    -- Закроем файл если он открыт
+    -- Р—Р°РєСЂРѕРµРј С„Р°Р№Р» РµСЃР»Рё РѕРЅ РѕС‚РєСЂС‹С‚
     IF utl_file.is_open(vfile) THEN      
       utl_file.fclose(vfile);
       vlog := vlog || chr(13) || chr(10) || to_char(sysdate, 'hh24:mi:ss dd.mm.yyyy');
@@ -248,7 +248,7 @@ exception
     vlog := vlog || chr(13) || chr(10) || 'load_row: ' || rowcounter;
     vlog := vlog || chr(13) || chr(10) || substr(sqlerrm, 1, 255) || chr(13) || chr(10);
     vlog := vlog || '--- **** ---' || chr(13) || chr(10);
-    --- запишем лог, это важно:
+    --- Р·Р°РїРёС€РµРј Р»РѕРі, СЌС‚Рѕ РІР°Р¶РЅРѕ:
     vfile := utl_file.fopen('FOREX_EXPERT', 'log.txt', 'A');
     for i in 1..v_ext_log.count 
     loop
@@ -259,4 +259,3 @@ exception
 end;
 end loop;
 end;
-/
