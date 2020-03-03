@@ -1,4 +1,4 @@
-create or replace procedure ubrr_tmp.JOB_LOADER_DATA
+create or replace procedure JOB_LOADER_DATA
 is
   --- для открытия файла ---
   vfile         utl_file.file_type;
